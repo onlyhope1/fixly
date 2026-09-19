@@ -11,6 +11,12 @@ class FirestorePaths {
 
   /// Top-level users collection.
   static const String users = 'users';
+
+  /// Service categories collection.
+  static const String services = 'services';
+
+  /// Service providers collection.
+  static const String providers = 'providers';
 }
 
 /// User role identifiers stored in the Firestore `role` field.
