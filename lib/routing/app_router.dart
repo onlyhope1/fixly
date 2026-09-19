@@ -5,7 +5,8 @@
 // route in the app and maps URL paths to screen widgets.
 // The splash screen is the initial route; auth screens are
 // top-level routes; the customer bottom-nav shell wraps the
-// four main tabs.
+// four main tabs.  The Home tab has nested routes for
+// category detail and provider detail screens.
 // ---------------------------------------------------------------
 
 import 'package:go_router/go_router.dart';
@@ -15,7 +16,9 @@ import '../features/auth/screens/phone_entry_screen.dart';
 import '../features/auth/screens/role_selection_screen.dart';
 import '../features/auth/screens/splash_screen.dart';
 import '../features/booking/screens/bookings_screen.dart';
+import '../features/home/screens/category_detail_screen.dart';
 import '../features/home/screens/home_screen.dart';
+import '../features/home/screens/provider_detail_screen.dart';
 import '../features/messages/screens/messages_screen.dart';
 import '../features/profile/screens/profile_screen.dart';
 import 'customer_shell.dart';
@@ -55,12 +58,39 @@ final GoRouter appRouter = GoRouter(
         return CustomerShell(navigationShell: navigationShell);
       },
       branches: [
-        // Tab 0 — Home
+        // Tab 0 — Home (with nested category/provider routes)
         StatefulShellBranch(
           routes: [
             GoRoute(
               path: '/home',
               builder: (context, state) => const HomeScreen(),
+              routes: [
+                // Category detail — /home/category/:categoryId
+                GoRoute(
+                  path: 'category/:categoryId',
+                  builder: (context, state) {
+                    final categoryId =
+                        state.pathParameters['categoryId']!;
+                    final categoryName =
+                        state.extra as String? ?? 'Category';
+                    return CategoryDetailScreen(
+                      categoryId: categoryId,
+                      categoryName: categoryName,
+                    );
+                  },
+                ),
+                // Provider detail — /home/provider/:providerId
+                GoRoute(
+                  path: 'provider/:providerId',
+                  builder: (context, state) {
+                    final providerId =
+                        state.pathParameters['providerId']!;
+                    return ProviderDetailScreen(
+                      providerId: providerId,
+                    );
+                  },
+                ),
+              ],
             ),
           ],
         ),
