@@ -7,16 +7,12 @@
 
 /// Firestore collection paths.
 class FirestorePaths {
-  FirestorePaths._(); // prevent instantiation
+  FirestorePaths._();
 
-  /// Top-level users collection.
   static const String users = 'users';
-
-  /// Service categories collection.
   static const String services = 'services';
-
-  /// Service providers collection.
   static const String providers = 'providers';
+  static const String bookings = 'bookings';
 }
 
 /// User role identifiers stored in the Firestore `role` field.
@@ -27,6 +23,16 @@ class UserRoles {
   static const String provider = 'provider';
 }
 
+/// Booking status values stored in the `status` field.
+class BookingStatus {
+  BookingStatus._();
+
+  static const String pending = 'pending';
+  static const String accepted = 'accepted';
+  static const String rejected = 'rejected';
+  static const String completed = 'completed';
+}
+
 /// App-wide UI constants.
 class AppConstants {
   AppConstants._();
@@ -34,4 +40,5 @@ class AppConstants {
   static const String appName = 'LocalServe';
   static const int otpLength = 6;
   static const int otpTimeoutSeconds = 60;
+  static const int defaultDurationHours = 1;
 }
