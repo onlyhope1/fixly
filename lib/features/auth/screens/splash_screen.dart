@@ -2,10 +2,8 @@
 // splash_screen.dart
 //
 // PURPOSE: The first screen the user sees.  Displays the app logo
-// and name for 2 seconds, then redirects based on auth state:
-//   • Signed in + has role  →  home
-//   • Signed in + no role   →  role selection
-//   • Not signed in         →  phone entry
+// and name for 2 seconds, then redirects based on auth state and
+// user role (customers go to /home, providers go to /provider-dashboard).
 // ---------------------------------------------------------------
 
 import 'package:flutter/material.dart';
@@ -26,7 +24,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Wait 2 seconds for branding, then navigate.
     Future.delayed(const Duration(seconds: 2), _navigate);
   }
 
@@ -38,24 +35,23 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     authState.when(
       data: (user) async {
         if (user == null) {
-          // Not signed in → phone entry.
           context.go('/phone');
         } else {
-          // Signed in → check if user has a Firestore profile.
           final appUser = await ref.read(appUserProvider.future);
           if (!mounted) return;
 
           if (appUser == null) {
-            // First-time user → role selection.
             context.go('/role-selection');
-          } else {
-            // Returning user → home.
+          } else if (appUser.isCustomer) {
+            // Customer → customer home.
             context.go('/home');
+          } else {
+            // Provider → provider dashboard.
+            context.go('/provider-dashboard');
           }
         }
       },
       loading: () {
-        // Auth still loading — wait and retry.
         Future.delayed(const Duration(seconds: 1), _navigate);
       },
       error: (e, _) => context.go('/phone'),
@@ -72,7 +68,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // App icon placeholder.
             Icon(
               Icons.home_repair_service_rounded,
               size: 80,

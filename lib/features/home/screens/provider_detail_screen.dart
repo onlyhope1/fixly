@@ -4,11 +4,13 @@
 // PURPOSE: Full profile view for a service provider.  Shows the
 // provider's photo, name, rating, hourly rate, about section,
 // availability status, and a placeholder reviews section.
-// A "Book Now" button at the bottom shows a snackbar for now.
+// "Book Now" navigates to the booking form; disabled if the
+// provider is not available.
 // ---------------------------------------------------------------
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_indicator.dart';
@@ -16,7 +18,6 @@ import '../providers/services_providers.dart';
 
 /// Full detail screen for a single service provider.
 class ProviderDetailScreen extends ConsumerWidget {
-  /// The Firestore document ID of the provider.
   final String providerId;
 
   const ProviderDetailScreen({
@@ -29,10 +30,7 @@ class ProviderDetailScreen extends ConsumerWidget {
     final providerAsync = ref.watch(providerDetailProvider(providerId));
 
     return providerAsync.when(
-      // ── Loading state ────────────────────────────────────────
       loading: () => const Scaffold(body: LoadingIndicator()),
-
-      // ── Error state ──────────────────────────────────────────
       error: (error, _) => Scaffold(
         appBar: AppBar(),
         body: ErrorView(
@@ -41,8 +39,6 @@ class ProviderDetailScreen extends ConsumerWidget {
               ref.invalidate(providerDetailProvider(providerId)),
         ),
       ),
-
-      // ── Data state ───────────────────────────────────────────
       data: (provider) {
         final theme = Theme.of(context);
 
@@ -52,14 +48,14 @@ class ProviderDetailScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Hero section ─────────────────────────────────
+                // \u2500\u2500 Hero section \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),
-                  color: theme.colorScheme.primary.withValues(alpha: 0.05),
+                  color: theme.colorScheme.primary
+                      .withValues(alpha: 0.05),
                   child: Column(
                     children: [
-                      // Provider photo
                       CircleAvatar(
                         radius: 50,
                         backgroundImage: provider.photoUrl.isNotEmpty
@@ -70,17 +66,12 @@ class ProviderDetailScreen extends ConsumerWidget {
                             : null,
                       ),
                       const SizedBox(height: 16),
-
-                      // Name
                       Text(
                         provider.name,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: theme.textTheme.headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
-
-                      // Rating row
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -89,22 +80,18 @@ class ProviderDetailScreen extends ConsumerWidget {
                           const SizedBox(width: 4),
                           Text(
                             provider.rating.toStringAsFixed(1),
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: theme.textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(width: 4),
                           Text(
                             '(${provider.totalReviews} reviews)',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey[600],
-                            ),
+                            style: theme.textTheme.bodyMedium
+                                ?.copyWith(color: Colors.grey[600]),
                           ),
                         ],
                       ),
                       const SizedBox(height: 8),
-
-                      // Location
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -113,9 +100,8 @@ class ProviderDetailScreen extends ConsumerWidget {
                           const SizedBox(width: 4),
                           Text(
                             provider.city,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey[600],
-                            ),
+                            style: theme.textTheme.bodyMedium
+                                ?.copyWith(color: Colors.grey[600]),
                           ),
                         ],
                       ),
@@ -123,7 +109,7 @@ class ProviderDetailScreen extends ConsumerWidget {
                   ),
                 ),
 
-                // ── Info chips ───────────────────────────────────
+                // \u2500\u2500 Info chips \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
@@ -141,8 +127,9 @@ class ProviderDetailScreen extends ConsumerWidget {
                           icon: provider.available
                               ? Icons.check_circle_outline
                               : Icons.cancel_outlined,
-                          label:
-                              provider.available ? 'Available' : 'Busy',
+                          label: provider.available
+                              ? 'Available'
+                              : 'Busy',
                           color: provider.available
                               ? Colors.green
                               : Colors.red,
@@ -152,19 +139,20 @@ class ProviderDetailScreen extends ConsumerWidget {
                   ),
                 ),
 
-                // ── About section ────────────────────────────────
+                // \u2500\u2500 About section \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
                 if (provider.about.isNotEmpty) ...[
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       'About',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: theme.textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                    padding:
+                        const EdgeInsets.fromLTRB(16, 8, 16, 16),
                     child: Text(
                       provider.about,
                       style: theme.textTheme.bodyMedium?.copyWith(
@@ -177,44 +165,49 @@ class ProviderDetailScreen extends ConsumerWidget {
 
                 const Divider(),
 
-                // ── Reviews section (placeholder) ────────────────
+                // \u2500\u2500 Reviews section (placeholder) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(
                     'Reviews',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: theme.textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
                 ..._placeholderReviews
-                    .map((review) => _ReviewCard(review: review)),
+                    .map((r) => _ReviewCard(review: r)),
 
-                // Space for the Book Now button
                 const SizedBox(height: 80),
               ],
             ),
           ),
 
-          // ── Book Now button ─────────────────────────────────
+          // \u2500\u2500 Book Now button \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
           bottomNavigationBar: SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: FilledButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Booking feature coming soon!'),
-                    ),
-                  );
-                },
+                onPressed: provider.available
+                    ? () => context.push(
+                          '/home/provider/${provider.id}/book',
+                          extra: {
+                            'providerName': provider.name,
+                            'hourlyRate': provider.hourlyRate,
+                            'serviceId': provider.categoryId,
+                          },
+                        )
+                    : null,
                 style: FilledButton.styleFrom(
                   minimumSize: const Size.fromHeight(52),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text('Book Now'),
+                child: Text(
+                  provider.available
+                      ? 'Book Now'
+                      : 'Currently Unavailable',
+                ),
               ),
             ),
           ),
@@ -224,15 +217,13 @@ class ProviderDetailScreen extends ConsumerWidget {
   }
 }
 
-// ── Placeholder review data ──────────────────────────────────────
+// \u2500\u2500 Placeholder review data \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
-/// A simple data holder for placeholder reviews.
 class _Review {
   final String name;
   final double rating;
   final String comment;
   final String date;
-
   const _Review({
     required this.name,
     required this.rating,
@@ -241,46 +232,38 @@ class _Review {
   });
 }
 
-/// Three hardcoded reviews to populate the reviews section.
 const _placeholderReviews = [
   _Review(
-    name: 'Amit S.',
-    rating: 5.0,
-    comment: 'Excellent work! Very professional and finished on time.',
-    date: '2 days ago',
-  ),
+      name: 'Amit S.',
+      rating: 5.0,
+      comment:
+          'Excellent work! Very professional and finished on time.',
+      date: '2 days ago'),
   _Review(
-    name: 'Priya M.',
-    rating: 4.0,
-    comment: 'Good service overall. Would recommend to others.',
-    date: '1 week ago',
-  ),
+      name: 'Priya M.',
+      rating: 4.0,
+      comment: 'Good service overall. Would recommend to others.',
+      date: '1 week ago'),
   _Review(
-    name: 'Rahul K.',
-    rating: 4.5,
-    comment: 'Very skilled and polite. Fair pricing too.',
-    date: '2 weeks ago',
-  ),
+      name: 'Rahul K.',
+      rating: 4.5,
+      comment: 'Very skilled and polite. Fair pricing too.',
+      date: '2 weeks ago'),
 ];
 
-// ── Helper widgets ───────────────────────────────────────────────
+// \u2500\u2500 Helper widgets \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
-/// A chip showing an icon and label (used for price and availability).
 class _InfoChip extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color? color;
-
-  const _InfoChip({
-    required this.icon,
-    required this.label,
-    this.color,
-  });
+  const _InfoChip(
+      {required this.icon, required this.label, this.color});
 
   @override
   Widget build(BuildContext context) {
-    final chipColor = color ?? Theme.of(context).colorScheme.primary;
-
+    final chipColor =
+        color ?? Theme.of(context).colorScheme.primary;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
@@ -292,32 +275,25 @@ class _InfoChip extends StatelessWidget {
         children: [
           Icon(icon, size: 20, color: chipColor),
           const SizedBox(width: 8),
-          Text(
-            label,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: chipColor,
-            ),
-          ),
+          Text(label,
+              style: TextStyle(
+                  fontWeight: FontWeight.w600, color: chipColor)),
         ],
       ),
     );
   }
 }
 
-/// A card displaying a single review with name, rating stars,
-/// comment, and date.
 class _ReviewCard extends StatelessWidget {
   final _Review review;
-
   const _ReviewCard({required this.review});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      padding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Card(
         elevation: 0,
         shape: RoundedRectangleBorder(
@@ -329,47 +305,34 @@ class _ReviewCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Name and date
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment:
+                    MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    review.name,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    review.date,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.grey[500],
-                    ),
-                  ),
+                  Text(review.name,
+                      style: theme.textTheme.titleSmall
+                          ?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(review.date,
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: Colors.grey[500])),
                 ],
               ),
               const SizedBox(height: 4),
-
-              // Star rating
               Row(
-                children: List.generate(5, (i) {
-                  return Icon(
-                    i < review.rating.floor()
-                        ? Icons.star_rounded
-                        : Icons.star_outline_rounded,
-                    size: 16,
-                    color: Colors.amber[700],
-                  );
-                }),
+                children: List.generate(
+                    5,
+                    (i) => Icon(
+                          i < review.rating.floor()
+                              ? Icons.star_rounded
+                              : Icons.star_outline_rounded,
+                          size: 16,
+                          color: Colors.amber[700],
+                        )),
               ),
               const SizedBox(height: 8),
-
-              // Comment text
-              Text(
-                review.comment,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[700],
-                ),
-              ),
+              Text(review.comment,
+                  style: theme.textTheme.bodyMedium
+                      ?.copyWith(color: Colors.grey[700])),
             ],
           ),
         ),
