@@ -8,6 +8,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 import '../../../core/utils/constants.dart';
 import '../../../models/app_user.dart';
@@ -72,10 +73,16 @@ class AuthRepository {
 
   /// Creates a new user document in Firestore after role selection.
   Future<void> createUser(AppUser user) async {
+    final token = await FirebaseMessaging.instance.getToken();
+    final userData = user.toFirestore();
+    if (token != null) {
+      userData['fcmToken'] = token;
+    }
+
     await _firestore
         .collection(FirestorePaths.users)
         .doc(user.uid)
-        .set(user.toFirestore());
+        .set(userData, SetOptions(merge: true));
   }
 
   // ── Session helpers ────────────────────────────────────────

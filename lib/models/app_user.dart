@@ -15,12 +15,14 @@ class AppUser {
   final String phoneNumber;
   final String role; // 'customer' or 'provider'
   final DateTime createdAt;
+  final String? fcmToken;
 
   const AppUser({
     required this.uid,
     required this.phoneNumber,
     required this.role,
     required this.createdAt,
+    this.fcmToken,
   });
 
   // ── Firestore serialization ────────────────────────────────
@@ -33,6 +35,7 @@ class AppUser {
       phoneNumber: data['phoneNumber'] as String,
       role: data['role'] as String,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
+      fcmToken: data['fcmToken'] as String?,
     );
   }
 
@@ -42,6 +45,7 @@ class AppUser {
       'phoneNumber': phoneNumber,
       'role': role,
       'createdAt': Timestamp.fromDate(createdAt),
+      if (fcmToken != null) 'fcmToken': fcmToken,
     };
   }
 

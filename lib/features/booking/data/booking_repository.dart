@@ -11,19 +11,22 @@
 // ---------------------------------------------------------------
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../core/utils/constants.dart';
 import '../../../models/booking.dart';
+
+import '../../../core/services/notification_service.dart';
 
 /// Repository that handles Firestore CRUD for bookings.
 class BookingRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   /// Creates a new booking document in Firestore.
-  Future<void> createBooking(Booking booking) async {
-    await _firestore
-        .collection(FirestorePaths.bookings)
-        .add(booking.toFirestore());
+  Future<String> createBooking(Booking booking) async {
+    final docRef = _firestore.collection(FirestorePaths.bookings).doc();
+    await docRef.set(booking.toFirestore());
+    return docRef.id;
   }
 
   /// Updates the status of an existing booking.
@@ -32,6 +35,36 @@ class BookingRepository {
         .collection(FirestorePaths.bookings)
         .doc(bookingId)
         .update({'status': status});
+
+    try {
+      final doc = await _firestore.collection(FirestorePaths.bookings).doc(bookingId).get();
+      if (!doc.exists) return;
+      final booking = Booking.fromFirestore(doc);
+      
+      if (status == BookingStatus.pending) {
+        // Customer just paid successfully
+        await NotificationService.instance.sendNotification(
+          targetUserId: booking.providerId,
+          title: 'New Booking Request',
+          body: 'You have a new request from ${booking.customerPhone}',
+        );
+      } else if (status == BookingStatus.accepted) {
+        await NotificationService.instance.sendNotification(
+          targetUserId: booking.customerId,
+          title: 'Booking Accepted',
+          body: '${booking.providerName} has accepted your booking.',
+        );
+      } else if (status == BookingStatus.rejected) {
+        await NotificationService.instance.sendNotification(
+          targetUserId: booking.customerId,
+          title: 'Booking Rejected',
+          body: '${booking.providerName} could not accept your booking.',
+        );
+      }
+    } catch (e) {
+      // Ignore notification failures so it doesn't break the app flow
+      debugPrint('Failed to send notification: $e');
+    }
   }
 
   // ── Customer queries ──────────────────────────────────────
