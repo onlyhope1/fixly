@@ -101,7 +101,7 @@ class _ProviderCard extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
       ),
       child: InkWell(
         onTap: onTap,
@@ -139,8 +139,8 @@ class _ProviderCard extends StatelessWidget {
                     // Rating row
                     Row(
                       children: [
-                        Icon(Icons.star_rounded,
-                            size: 16, color: Colors.amber[700]),
+                        const Icon(Icons.star_rounded,
+                            size: 16, color: Colors.amber),
                         const SizedBox(width: 4),
                         Text(
                           provider.rating.toStringAsFixed(1),
@@ -148,10 +148,13 @@ class _ProviderCard extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        Text(
-                          ' (${provider.totalReviews} reviews)',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
+                        Flexible(
+                          child: Text(
+                            ' (${provider.totalReviews} reviews)',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -162,12 +165,15 @@ class _ProviderCard extends StatelessWidget {
                     Row(
                       children: [
                         Icon(Icons.location_on_outlined,
-                            size: 14, color: Colors.grey[500]),
+                            size: 14, color: theme.colorScheme.onSurfaceVariant),
                         const SizedBox(width: 2),
-                        Text(
-                          provider.city,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
+                        Expanded(
+                          child: Text(
+                            provider.city,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -190,7 +196,7 @@ class _ProviderCard extends StatelessWidget {
                   Text(
                     '/hr',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.grey[600],
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -200,8 +206,8 @@ class _ProviderCard extends StatelessWidget {
                         horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
                       color: provider.available
-                          ? Colors.green.withValues(alpha: 0.1)
-                          : Colors.red.withValues(alpha: 0.1),
+                          ? Colors.green.withValues(alpha: 0.12)
+                          : theme.colorScheme.error.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -210,7 +216,7 @@ class _ProviderCard extends StatelessWidget {
                         fontSize: 11,
                         color: provider.available
                             ? Colors.green[700]
-                            : Colors.red[700],
+                            : theme.colorScheme.error,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

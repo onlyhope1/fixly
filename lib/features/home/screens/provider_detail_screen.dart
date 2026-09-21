@@ -87,7 +87,7 @@ class ProviderDetailScreen extends ConsumerWidget {
                           Text(
                             '(${provider.totalReviews} reviews)',
                             style: theme.textTheme.bodyMedium
-                                ?.copyWith(color: Colors.grey[600]),
+                                ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                           ),
                         ],
                       ),
@@ -96,12 +96,12 @@ class ProviderDetailScreen extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.location_on_outlined,
-                              size: 16, color: Colors.grey[600]),
+                              size: 16, color: theme.colorScheme.onSurfaceVariant),
                           const SizedBox(width: 4),
                           Text(
                             provider.city,
                             style: theme.textTheme.bodyMedium
-                                ?.copyWith(color: Colors.grey[600]),
+                                ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                           ),
                         ],
                       ),
@@ -156,7 +156,7 @@ class ProviderDetailScreen extends ConsumerWidget {
                     child: Text(
                       provider.about,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[700],
+                        color: theme.colorScheme.onSurfaceVariant,
                         height: 1.5,
                       ),
                     ),
@@ -174,8 +174,14 @@ class ProviderDetailScreen extends ConsumerWidget {
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
-                ..._placeholderReviews
-                    .map((r) => _ReviewCard(review: r)),
+                if (_placeholderReviews.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text('No reviews yet.', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                  )
+                else
+                  ..._placeholderReviews
+                      .map((r) => _ReviewCard(review: r)),
 
                 const SizedBox(height: 80),
               ],
@@ -268,16 +274,20 @@ class _InfoChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, size: 20, color: chipColor),
           const SizedBox(width: 8),
-          Text(label,
-              style: TextStyle(
-                  fontWeight: FontWeight.w600, color: chipColor)),
+          Flexible(
+            child: Text(label,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                style: TextStyle(
+                    fontWeight: FontWeight.w600, color: chipColor)),
+          ),
         ],
       ),
     );
@@ -298,7 +308,7 @@ class _ReviewCard extends StatelessWidget {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: Colors.grey.shade200),
+          side: BorderSide(color: theme.colorScheme.outlineVariant),
         ),
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -309,12 +319,15 @@ class _ReviewCard extends StatelessWidget {
                 mainAxisAlignment:
                     MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(review.name,
-                      style: theme.textTheme.titleSmall
-                          ?.copyWith(fontWeight: FontWeight.bold)),
+                  Expanded(
+                    child: Text(review.name,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall
+                            ?.copyWith(fontWeight: FontWeight.bold)),
+                  ),
                   Text(review.date,
                       style: theme.textTheme.bodySmall
-                          ?.copyWith(color: Colors.grey[500])),
+                          ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 ],
               ),
               const SizedBox(height: 4),
@@ -332,7 +345,7 @@ class _ReviewCard extends StatelessWidget {
               const SizedBox(height: 8),
               Text(review.comment,
                   style: theme.textTheme.bodyMedium
-                      ?.copyWith(color: Colors.grey[700])),
+                      ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
             ],
           ),
         ),

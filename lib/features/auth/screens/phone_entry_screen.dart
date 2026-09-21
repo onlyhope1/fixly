@@ -78,77 +78,79 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Spacer(),
-
-                // ── Header ──────────────────────────────────
-                Icon(
-                  Icons.phone_android_rounded,
-                  size: 64,
-                  color: theme.colorScheme.primary,
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Enter your phone number',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 48),
+  
+                  // ── Header ──────────────────────────────────
+                  Icon(
+                    Icons.phone_android_rounded,
+                    size: 64,
+                    color: theme.colorScheme.primary,
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'We\'ll send you a one-time verification code',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const SizedBox(height: 40),
-
-                // ── Phone input ─────────────────────────────
-                TextFormField(
-                  controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  maxLength: 10,
-                  validator: Validators.phoneNumber,
-                  decoration: InputDecoration(
-                    prefixText: '+91  ',
-                    labelText: 'Phone Number',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    counterText: '',
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // ── Send OTP button ─────────────────────────
-                FilledButton(
-                  onPressed: _isLoading ? null : _sendOtp,
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(52),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Enter your phone number',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('Send OTP'),
-                ),
-
-                const Spacer(flex: 2),
-              ],
+                  const SizedBox(height: 8),
+                  Text(
+                    'We\'ll send you a one-time verification code',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+  
+                  // ── Phone input ─────────────────────────────
+                  TextFormField(
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                    maxLength: 10,
+                    validator: Validators.phoneNumber,
+                    decoration: InputDecoration(
+                      prefixText: '+91  ',
+                      labelText: 'Phone Number',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      counterText: '',
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+  
+                  // ── Send OTP button ─────────────────────────
+                  FilledButton(
+                    onPressed: _isLoading ? null : _sendOtp,
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(52),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: theme.colorScheme.onPrimary,
+                            ),
+                          )
+                        : const Text('Send OTP'),
+                  ),
+  
+                  const SizedBox(height: 48),
+                ],
+              ),
             ),
           ),
         ),

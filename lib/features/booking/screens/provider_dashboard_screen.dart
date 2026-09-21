@@ -110,14 +110,22 @@ class _RequestCardState extends ConsumerState<_RequestCard> {
                 const Text(
                     'This booking overlaps with an accepted job:'),
                 const SizedBox(height: 12),
-                ...conflicts.map((c) => Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Text(
-                        '\u2022 ${DateFormat('MMM d, h:mm a').format(c.scheduledTime)} '
-                        '(${c.durationHours}hr) \u2014 ${c.serviceName}',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                    )),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 250),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: conflicts.map((c) => Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          '\u2022 ${DateFormat('MMM d, h:mm a').format(c.scheduledTime)} '
+                          '(${c.durationHours}hr) \u2014 ${c.serviceName}',
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      )).toList(),
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 12),
                 const Text('Do you still want to accept?'),
               ],
@@ -183,7 +191,7 @@ class _RequestCardState extends ConsumerState<_RequestCard> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -193,7 +201,7 @@ class _RequestCardState extends ConsumerState<_RequestCard> {
             // Customer phone
             Row(
               children: [
-                Icon(Icons.phone, size: 16, color: Colors.grey[600]),
+                Icon(Icons.phone, size: 16, color: theme.colorScheme.onSurfaceVariant),
                 const SizedBox(width: 4),
                 Text(booking.customerPhone,
                     style: theme.textTheme.bodyMedium
@@ -212,14 +220,17 @@ class _RequestCardState extends ConsumerState<_RequestCard> {
             Row(
               children: [
                 Icon(Icons.access_time,
-                    size: 14, color: Colors.grey[500]),
+                    size: 14, color: theme.colorScheme.onSurfaceVariant),
                 const SizedBox(width: 4),
-                Text(
-                  '${DateFormat('EEE, MMM d').format(booking.scheduledTime)} '
-                  'at ${DateFormat('h:mm a').format(booking.scheduledTime)} '
-                  '(${booking.durationHours}hr${booking.durationHours > 1 ? 's' : ''})',
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: Colors.grey[600]),
+                Expanded(
+                  child: Text(
+                    '${DateFormat('EEE, MMM d').format(booking.scheduledTime)} '
+                    'at ${DateFormat('h:mm a').format(booking.scheduledTime)} '
+                    '(${booking.durationHours}hr${booking.durationHours > 1 ? 's' : ''})',
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
@@ -229,12 +240,12 @@ class _RequestCardState extends ConsumerState<_RequestCard> {
             Row(
               children: [
                 Icon(Icons.location_on_outlined,
-                    size: 14, color: Colors.grey[500]),
+                    size: 14, color: theme.colorScheme.onSurfaceVariant),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(booking.address,
                       style: theme.textTheme.bodySmall
-                          ?.copyWith(color: Colors.grey[600]),
+                          ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                       overflow: TextOverflow.ellipsis),
                 ),
               ],
@@ -246,12 +257,12 @@ class _RequestCardState extends ConsumerState<_RequestCard> {
               Row(
                 children: [
                   Icon(Icons.note_outlined,
-                      size: 14, color: Colors.grey[500]),
+                      size: 14, color: theme.colorScheme.onSurfaceVariant),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(booking.notes,
                         style: theme.textTheme.bodySmall
-                            ?.copyWith(color: Colors.grey[600]),
+                            ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                         overflow: TextOverflow.ellipsis),
                   ),
                 ],

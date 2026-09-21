@@ -121,7 +121,7 @@ class _BookingCard extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -148,13 +148,16 @@ class _BookingCard extends StatelessWidget {
             // Date and time
             Row(
               children: [
-                Icon(Icons.access_time, size: 14, color: Colors.grey[500]),
+                Icon(Icons.access_time, size: 14, color: theme.colorScheme.onSurfaceVariant),
                 const SizedBox(width: 4),
-                Text(
-                  '${DateFormat('EEE, MMM d').format(booking.scheduledTime)} '
-                  'at ${DateFormat('h:mm a').format(booking.scheduledTime)} '
-                  '(${booking.durationHours}hr${booking.durationHours > 1 ? 's' : ''})',
-                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                Expanded(
+                  child: Text(
+                    '${DateFormat('EEE, MMM d').format(booking.scheduledTime)} '
+                    'at ${DateFormat('h:mm a').format(booking.scheduledTime)} '
+                    '(${booking.durationHours}hr${booking.durationHours > 1 ? 's' : ''})',
+                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
@@ -163,12 +166,12 @@ class _BookingCard extends StatelessWidget {
             // Address
             Row(
               children: [
-                Icon(Icons.location_on_outlined, size: 14, color: Colors.grey[500]),
+                Icon(Icons.location_on_outlined, size: 14, color: theme.colorScheme.onSurfaceVariant),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     booking.address,
-                    style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),

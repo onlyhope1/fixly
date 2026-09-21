@@ -58,31 +58,40 @@ class ProviderJobsScreen extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              if (upcoming.isNotEmpty) ...[
-                Text('Upcoming',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
+              Text('Upcoming',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              if (upcoming.isNotEmpty)
                 ...upcoming.map((j) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: _JobCard(booking: j, showComplete: false),
-                    )),
-              ],
-              if (pastDue.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text('Ready to Complete',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
+                    ))
+              else
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Text('No upcoming jobs.', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                ),
+              
+              const SizedBox(height: 8),
+              Text('Ready to Complete',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              if (pastDue.isNotEmpty)
                 ...pastDue.map((j) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: _JobCard(booking: j, showComplete: true),
-                    )),
-              ],
+                    ))
+              else
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Text('No past due jobs.', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                ),
             ],
           );
         },
@@ -132,7 +141,7 @@ class _JobCardState extends ConsumerState<_JobCard> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -146,14 +155,17 @@ class _JobCardState extends ConsumerState<_JobCard> {
             Row(
               children: [
                 Icon(Icons.access_time,
-                    size: 14, color: Colors.grey[500]),
+                    size: 14, color: theme.colorScheme.onSurfaceVariant),
                 const SizedBox(width: 4),
-                Text(
-                  '${DateFormat('EEE, MMM d').format(booking.scheduledTime)} '
-                  'at ${DateFormat('h:mm a').format(booking.scheduledTime)} '
-                  '(${booking.durationHours}hr${booking.durationHours > 1 ? 's' : ''})',
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: Colors.grey[600]),
+                Expanded(
+                  child: Text(
+                    '${DateFormat('EEE, MMM d').format(booking.scheduledTime)} '
+                    'at ${DateFormat('h:mm a').format(booking.scheduledTime)} '
+                    '(${booking.durationHours}hr${booking.durationHours > 1 ? 's' : ''})',
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
@@ -161,12 +173,12 @@ class _JobCardState extends ConsumerState<_JobCard> {
             Row(
               children: [
                 Icon(Icons.location_on_outlined,
-                    size: 14, color: Colors.grey[500]),
+                    size: 14, color: theme.colorScheme.onSurfaceVariant),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(booking.address,
                       style: theme.textTheme.bodySmall
-                          ?.copyWith(color: Colors.grey[600]),
+                          ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                       overflow: TextOverflow.ellipsis),
                 ),
               ],
@@ -174,22 +186,24 @@ class _JobCardState extends ConsumerState<_JobCard> {
             const SizedBox(height: 4),
             Row(
               children: [
-                Icon(Icons.phone, size: 14, color: Colors.grey[500]),
+                Icon(Icons.phone, size: 14, color: theme.colorScheme.onSurfaceVariant),
                 const SizedBox(width: 4),
                 Text(booking.customerPhone,
                     style: theme.textTheme.bodySmall
-                        ?.copyWith(color: Colors.grey[600])),
+                        ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
               ],
             ),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '\u20B9${booking.price.toInt()}',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
+                Flexible(
+                  child: Text(
+                    '\u20B9${booking.price.toInt()}',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                    ),
                   ),
                 ),
                 if (widget.showComplete)

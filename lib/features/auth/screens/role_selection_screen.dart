@@ -86,64 +86,64 @@ class _RoleSelectionScreenState extends ConsumerState<RoleSelectionScreen> {
 
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Spacer(),
-              Text(
-                'How will you use LocalServe?',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.headlineSmall
-                    ?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Choose your role to get started',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium
-                    ?.copyWith(color: Colors.grey[600]),
-              ),
-              const SizedBox(height: 48),
-              _RoleCard(
-                icon: Icons.person_rounded,
-                title: 'Customer',
-                subtitle: 'I\'m looking for local services',
-                isSelected: _selectedRole == UserRoles.customer,
-                onTap: () =>
-                    setState(() => _selectedRole = UserRoles.customer),
-              ),
-              const SizedBox(height: 16),
-              _RoleCard(
-                icon: Icons.handyman_rounded,
-                title: 'Service Provider',
-                subtitle: 'I want to offer my services',
-                isSelected: _selectedRole == UserRoles.provider,
-                onTap: () =>
-                    setState(() => _selectedRole = UserRoles.provider),
-              ),
-              const SizedBox(height: 48),
-              FilledButton(
-                onPressed:
-                    _selectedRole == null || _isLoading ? null : _saveRole,
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(52),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'How will you use LocalServe?',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.headlineSmall
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
-                      )
-                    : const Text('Continue'),
-              ),
-              const Spacer(flex: 2),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  'Choose your role to get started',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium
+                      ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                ),
+                const SizedBox(height: 48),
+                _RoleCard(
+                  icon: Icons.person_rounded,
+                  title: 'Customer',
+                  subtitle: 'I\'m looking for local services',
+                  isSelected: _selectedRole == UserRoles.customer,
+                  onTap: () =>
+                      setState(() => _selectedRole = UserRoles.customer),
+                ),
+                const SizedBox(height: 16),
+                _RoleCard(
+                  icon: Icons.handyman_rounded,
+                  title: 'Service Provider',
+                  subtitle: 'I want to offer my services',
+                  isSelected: _selectedRole == UserRoles.provider,
+                  onTap: () =>
+                      setState(() => _selectedRole = UserRoles.provider),
+                ),
+                const SizedBox(height: 48),
+                FilledButton(
+                  onPressed:
+                      _selectedRole == null || _isLoading ? null : _saveRole,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(52),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: _isLoading
+                      ? SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2, color: theme.colorScheme.onPrimary),
+                        )
+                      : const Text('Continue'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -169,7 +169,7 @@ class _RoleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = isSelected ? theme.colorScheme.primary : Colors.grey[300]!;
+    final color = isSelected ? theme.colorScheme.primary : theme.colorScheme.outlineVariant;
 
     return GestureDetector(
       onTap: onTap,
@@ -181,7 +181,7 @@ class _RoleCard extends StatelessWidget {
           border: Border.all(color: color, width: isSelected ? 2 : 1),
           color: isSelected
               ? theme.colorScheme.primary.withValues(alpha: 0.05)
-              : Colors.white,
+              : theme.colorScheme.surface,
         ),
         child: Row(
           children: [
@@ -197,7 +197,7 @@ class _RoleCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(subtitle,
                       style: theme.textTheme.bodySmall
-                          ?.copyWith(color: Colors.grey[600])),
+                          ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 ],
               ),
             ),

@@ -89,66 +89,68 @@ class _OtpVerificationScreenState
     final theme = Theme.of(context);
 
     // Pinput theme for OTP boxes.
-    final defaultPinTheme = PinTheme(
+      final defaultPinTheme = PinTheme(
       width: 48,
       height: 56,
       textStyle: theme.textTheme.headlineSmall,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
     );
 
     return Scaffold(
       appBar: AppBar(title: const Text('Verify OTP')),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              const SizedBox(height: 40),
-
-              // ── Instruction text ──────────────────────────
-              Text(
-                'Enter the 6-digit code sent to',
-                style: theme.textTheme.bodyLarge,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                widget.phoneNumber,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              children: [
+                const SizedBox(height: 40),
+  
+                // ── Instruction text ──────────────────────────
+                Text(
+                  'Enter the 6-digit code sent to',
+                  style: theme.textTheme.bodyLarge,
                 ),
-              ),
-              const SizedBox(height: 40),
-
-              // ── OTP input ─────────────────────────────────
-              Pinput(
-                controller: _otpController,
-                length: AppConstants.otpLength,
-                defaultPinTheme: defaultPinTheme,
-                focusedPinTheme: defaultPinTheme.copyDecorationWith(
-                  border: Border.all(color: theme.colorScheme.primary, width: 2),
-                ),
-                onCompleted: _verifyOtp,
-              ),
-              const SizedBox(height: 32),
-
-              // ── Verify button ─────────────────────────────
-              if (_isLoading)
-                const CircularProgressIndicator()
-              else
-                FilledButton(
-                  onPressed: () => _verifyOtp(_otpController.text),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(52),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                const SizedBox(height: 4),
+                Text(
+                  widget.phoneNumber,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                  child: const Text('Verify'),
                 ),
-            ],
+                const SizedBox(height: 40),
+  
+                // ── OTP input ─────────────────────────────────
+                Pinput(
+                  controller: _otpController,
+                  length: AppConstants.otpLength,
+                  defaultPinTheme: defaultPinTheme,
+                  focusedPinTheme: defaultPinTheme.copyDecorationWith(
+                    border: Border.all(color: theme.colorScheme.primary, width: 2),
+                  ),
+                  onCompleted: _verifyOtp,
+                ),
+                const SizedBox(height: 32),
+  
+                // ── Verify button ─────────────────────────────
+                if (_isLoading)
+                  const CircularProgressIndicator()
+                else
+                  FilledButton(
+                    onPressed: () => _verifyOtp(_otpController.text),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(52),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Verify'),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
