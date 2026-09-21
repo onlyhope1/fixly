@@ -28,6 +28,7 @@ class BookingStatus {
   BookingStatus._();
 
   static const String pending = 'pending';
+  static const String pendingPayment = 'pending_payment';
   static const String accepted = 'accepted';
   static const String rejected = 'rejected';
   static const String completed = 'completed';

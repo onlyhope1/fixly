@@ -13,6 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 import '../../../core/utils/constants.dart';
 import '../../../models/booking.dart';
@@ -41,12 +42,14 @@ class _BookingFormScreenState extends ConsumerState<BookingFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _addressController = TextEditingController();
   final _notesController = TextEditingController();
+  late Razorpay _razorpay;
 
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
   int _durationHours = AppConstants.defaultDurationHours;
   bool _isSubmitting = false;
   bool _isGettingLocation = false;
+  String? _pendingBookingId;
 
   /// Capitalizes the service ID for display (e.g. "plumbing" -> "Plumbing").
   String get _serviceName {
@@ -58,10 +61,50 @@ class _BookingFormScreenState extends ConsumerState<BookingFormScreen> {
   double get _totalPrice => widget.hourlyRate * _durationHours;
 
   @override
+  void initState() {
+    super.initState();
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+  }
+
+  @override
   void dispose() {
+    _razorpay.clear();
     _addressController.dispose();
     _notesController.dispose();
     super.dispose();
+  }
+
+  // ── Razorpay handlers ──────────────────────────────────────
+
+  void _handlePaymentSuccess(PaymentSuccessResponse response) async {
+    if (_pendingBookingId == null) return;
+    try {
+      await ref
+          .read(bookingRepositoryProvider)
+          .updateBookingStatus(_pendingBookingId!, BookingStatus.pending);
+      if (!mounted) return;
+      _showSnackBar('Payment successful! Booking request sent.');
+      context.pop();
+    } catch (e) {
+      _showSnackBar('Failed to update booking status: $e');
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    _showSnackBar('Payment failed. Try again from your Bookings tab.');
+    if (mounted) {
+      setState(() => _isSubmitting = false);
+      context.pop(); // Pop to home, they can retry from Bookings tab later
+    }
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    _showSnackBar('External wallet selected: ${response.walletName}');
   }
 
   // ── Date picker ───────────────────────────────────────────
@@ -161,7 +204,7 @@ class _BookingFormScreenState extends ConsumerState<BookingFormScreen> {
       customerPhone: user.phoneNumber ?? '',
       scheduledTime: scheduledTime,
       durationHours: _durationHours,
-      status: BookingStatus.pending,
+      status: BookingStatus.pendingPayment,
       address: _addressController.text.trim(),
       price: _totalPrice,
       notes: _notesController.text.trim(),
@@ -169,16 +212,20 @@ class _BookingFormScreenState extends ConsumerState<BookingFormScreen> {
     );
 
     try {
-      await ref.read(bookingRepositoryProvider).createBooking(booking);
+      _pendingBookingId = await ref.read(bookingRepositoryProvider).createBooking(booking);
 
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Booking request sent!')),
-      );
-      context.pop();
+      var options = {
+        'key': 'rzp_test_YourTestKey',
+        'amount': (_totalPrice * 100).toInt(),
+        'name': 'LocalServe',
+        'description': 'Booking for $_serviceName',
+        'prefill': {'contact': user.phoneNumber ?? '', 'email': ''},
+        'notes': {'bookingId': _pendingBookingId}
+      };
+      
+      _razorpay.open(options);
     } catch (e) {
       _showSnackBar('Failed to create booking: $e');
-    } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
   }
@@ -215,7 +262,7 @@ class _BookingFormScreenState extends ConsumerState<BookingFormScreen> {
                             Text(
                               '₹${widget.hourlyRate.toInt()}/hr',
                               style: theme.textTheme.bodyMedium
-                                  ?.copyWith(color: Colors.grey[600]),
+                                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                             ),
                           ],
                         ),
@@ -232,7 +279,7 @@ class _BookingFormScreenState extends ConsumerState<BookingFormScreen> {
                       ?.copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               OutlinedButton.icon(
-                onPressed: _pickDate,
+                onPressed: _isSubmitting ? null : _pickDate,
                 icon: const Icon(Icons.calendar_today),
                 label: Text(
                   _selectedDate != null
@@ -252,7 +299,7 @@ class _BookingFormScreenState extends ConsumerState<BookingFormScreen> {
                       ?.copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               OutlinedButton.icon(
-                onPressed: _pickTime,
+                onPressed: _isSubmitting ? null : _pickTime,
                 icon: const Icon(Icons.access_time),
                 label: Text(
                   _selectedTime != null
@@ -285,7 +332,7 @@ class _BookingFormScreenState extends ConsumerState<BookingFormScreen> {
                     child: Text('$h hour${h > 1 ? 's' : ''}'),
                   );
                 }).toList(),
-                onChanged: (val) {
+                onChanged: _isSubmitting ? null : (val) {
                   if (val != null) setState(() => _durationHours = val);
                 },
               ),
@@ -298,6 +345,7 @@ class _BookingFormScreenState extends ConsumerState<BookingFormScreen> {
               const SizedBox(height: 8),
               TextFormField(
                 controller: _addressController,
+                enabled: !_isSubmitting,
                 validator: (v) =>
                     v == null || v.trim().isEmpty ? 'Address is required' : null,
                 decoration: InputDecoration(
@@ -311,7 +359,7 @@ class _BookingFormScreenState extends ConsumerState<BookingFormScreen> {
               ),
               const SizedBox(height: 8),
               OutlinedButton.icon(
-                onPressed: _isGettingLocation ? null : _useMyLocation,
+                onPressed: (_isGettingLocation || _isSubmitting) ? null : _useMyLocation,
                 icon: _isGettingLocation
                     ? const SizedBox(
                         height: 16,
@@ -330,6 +378,7 @@ class _BookingFormScreenState extends ConsumerState<BookingFormScreen> {
               const SizedBox(height: 8),
               TextFormField(
                 controller: _notesController,
+                enabled: !_isSubmitting,
                 decoration: InputDecoration(
                   hintText: 'Any special requests...',
                   prefixIcon: const Icon(Icons.note_outlined),
@@ -351,19 +400,21 @@ class _BookingFormScreenState extends ConsumerState<BookingFormScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Price Summary',
-                            style: theme.textTheme.titleSmall
-                                ?.copyWith(fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 4),
-                        Text(
-                          '₹${widget.hourlyRate.toInt()}/hr × $_durationHours hr${_durationHours > 1 ? 's' : ''}',
-                          style: theme.textTheme.bodySmall
-                              ?.copyWith(color: Colors.grey[600]),
-                        ),
-                      ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Price Summary',
+                              style: theme.textTheme.titleSmall
+                                  ?.copyWith(fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 4),
+                          Text(
+                            '₹${widget.hourlyRate.toInt()}/hr × $_durationHours hr${_durationHours > 1 ? 's' : ''}',
+                            style: theme.textTheme.bodySmall
+                                ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                          ),
+                        ],
+                      ),
                     ),
                     Text(
                       '₹${_totalPrice.toInt()}',
@@ -393,8 +444,9 @@ class _BookingFormScreenState extends ConsumerState<BookingFormScreen> {
                         child: CircularProgressIndicator(
                             strokeWidth: 2, color: Colors.white),
                       )
-                    : const Text('Confirm Booking'),
+                    : const Text('Confirm & Pay'),
               ),
+              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -402,3 +454,4 @@ class _BookingFormScreenState extends ConsumerState<BookingFormScreen> {
     );
   }
 }
+
