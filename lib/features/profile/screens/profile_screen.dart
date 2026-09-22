@@ -9,6 +9,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'privacy_policy_screen.dart';
+
 /// Placeholder screen for the Profile tab.
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -33,6 +35,22 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 32),
+
+            // ── Privacy Policy ─────────────────────────────
+            ListTile(
+              leading: const Icon(Icons.privacy_tip_outlined),
+              title: const Text('Privacy Policy'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const PrivacyPolicyScreen(),
+                  ),
+                );
+              },
+            ),
+            const Divider(),
+            const SizedBox(height: 16),
 
             // ── Sign out button ─────────────────────────────
             OutlinedButton.icon(

@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../models/service_category.dart';
 import '../../../models/service_provider.dart';
+import '../../../models/review.dart';
 import '../data/services_repository.dart';
 
 /// Provides a singleton [ServicesRepository] instance.
@@ -40,3 +41,10 @@ final providerDetailProvider =
     FutureProvider.family<ServiceProvider, String>((ref, providerId) {
   return ref.watch(servicesRepositoryProvider).getProvider(providerId);
 });
+
+/// Streams reviews for a provider.
+final providerReviewsProvider =
+    StreamProvider.family<List<Review>, String>((ref, providerId) {
+  return ref.watch(servicesRepositoryProvider).getProviderReviews(providerId);
+});
+

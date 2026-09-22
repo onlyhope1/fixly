@@ -16,6 +16,7 @@ import '../../../core/widgets/empty_view.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../../../models/booking.dart';
+import '../../../models/review.dart';
 import '../providers/booking_providers.dart';
 
 /// Customer's "My Bookings" tab with Upcoming and Past sections.
@@ -108,13 +109,12 @@ class _BookingList extends StatelessWidget {
   }
 }
 
-/// Card showing a single booking's details and status badge.
-class _BookingCard extends StatelessWidget {
+class _BookingCard extends ConsumerWidget {
   final Booking booking;
   const _BookingCard({required this.booking});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
     return Card(
@@ -179,17 +179,101 @@ class _BookingCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
 
-            // Price
-            Text(
-              '₹${booking.price.toInt()}',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.primary,
-              ),
+            // Price and Review Button
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '₹${booking.price.toInt()}',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                if (booking.status == BookingStatus.completed && !booking.isRated)
+                  OutlinedButton(
+                    onPressed: () {
+                      _showReviewDialog(context, ref, booking);
+                    },
+                    child: const Text('Leave a Review'),
+                  ),
+              ],
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void _showReviewDialog(BuildContext context, WidgetRef ref, Booking booking) {
+    double rating = 5.0;
+    final commentController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Leave a Review'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(5, (index) {
+                      return IconButton(
+                        icon: Icon(
+                          index < rating ? Icons.star : Icons.star_border,
+                          color: Colors.amber,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            rating = index + 1.0;
+                          });
+                        },
+                      );
+                    }),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: commentController,
+                    decoration: const InputDecoration(
+                      labelText: 'Comment',
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLines: 3,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () async {
+                    final review = Review(
+                      id: '',
+                      bookingId: booking.id,
+                      customerId: booking.customerId,
+                      customerName: 'Customer', // Would fetch actual name in real app, assuming dummy here or checking models
+                      rating: rating,
+                      comment: commentController.text,
+                      createdAt: DateTime.now(),
+                    );
+                    await ref
+                        .read(bookingRepositoryProvider)
+                        .submitReview(providerId: booking.providerId, review: review);
+                    if (context.mounted) Navigator.of(context).pop();
+                  },
+                  child: const Text('Submit'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

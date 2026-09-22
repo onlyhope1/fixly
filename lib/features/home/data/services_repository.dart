@@ -12,6 +12,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/utils/constants.dart';
 import '../../../models/service_category.dart';
 import '../../../models/service_provider.dart';
+import '../../../models/review.dart';
 
 /// Repository that handles Firestore reads for service categories
 /// and service providers.
@@ -60,5 +61,18 @@ class ServicesRepository {
     }
 
     return ServiceProvider.fromFirestore(doc);
+  }
+
+  /// Streams reviews for a given provider.
+  Stream<List<Review>> getProviderReviews(String providerId) {
+    return _firestore
+        .collection(FirestorePaths.providers)
+        .doc(providerId)
+        .collection('reviews')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => Review.fromFirestore(doc))
+            .toList());
   }
 }

@@ -25,6 +25,7 @@ class Booking {
   final double price;
   final String notes;
   final DateTime createdAt;
+  final bool isRated;
 
   const Booking({
     required this.id,
@@ -41,6 +42,7 @@ class Booking {
     required this.price,
     required this.notes,
     required this.createdAt,
+    this.isRated = false,
   });
 
   // ── Firestore serialization ────────────────────────────────
@@ -62,6 +64,7 @@ class Booking {
       price: (data['price'] as num).toDouble(),
       notes: data['notes'] as String? ?? '',
       createdAt: (data['createdAt'] as Timestamp).toDate(),
+      isRated: data['isRated'] as bool? ?? false,
     );
   }
 
@@ -80,6 +83,7 @@ class Booking {
       'price': price,
       'notes': notes,
       'createdAt': Timestamp.fromDate(createdAt),
+      'isRated': isRated,
     };
   }
 

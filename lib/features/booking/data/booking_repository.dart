@@ -15,6 +15,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../core/utils/constants.dart';
 import '../../../models/booking.dart';
+import '../../../models/review.dart';
 
 import '../../../core/services/notification_service.dart';
 
@@ -156,5 +157,35 @@ class BookingRepository {
         .map((d) => Booking.fromFirestore(d))
         .where((existing) => proposed.overlaps(existing))
         .toList();
+  }
+
+  /// Submits a review and updates provider rating/totalReviews and booking isRated status
+  Future<void> submitReview({required String providerId, required Review review}) async {
+    final providerRef = _firestore.collection('providers').doc(providerId);
+    final reviewRef = providerRef.collection('reviews').doc(review.id.isEmpty ? null : review.id);
+    final bookingRef = _firestore.collection(FirestorePaths.bookings).doc(review.bookingId);
+
+    await _firestore.runTransaction((transaction) async {
+      final providerDoc = await transaction.get(providerRef);
+      if (!providerDoc.exists) {
+        throw Exception('Provider does not exist!');
+      }
+
+      final data = providerDoc.data()!;
+      final int totalReviews = (data['totalReviews'] as int?) ?? 0;
+      final double currentRating = (data['rating'] as num?)?.toDouble() ?? 0.0;
+
+      final newTotalReviews = totalReviews + 1;
+      final newRating = ((currentRating * totalReviews) + review.rating) / newTotalReviews;
+
+      transaction.set(reviewRef, review.toFirestore());
+      transaction.update(providerRef, {
+        'totalReviews': newTotalReviews,
+        'rating': newRating,
+      });
+      transaction.update(bookingRef, {
+        'isRated': true,
+      });
+    });
   }
 }
